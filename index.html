@@ -1,0 +1,87 @@
+
+
+
+
+<body>
+    <style>
+        .main{
+            border:1px solid black;
+        }
+        .box{
+            width:20px;
+            height:20px;
+            display:inline-block;
+        }
+    </style>
+    <script>
+        function id(id){return document.getElementById(id);}
+        function rand(min, max){return parseInt(Math.random() * (max - min) + min);}
+
+        
+        main={
+            height:30,
+            width:50,
+            speed:10,
+            waves:[]
+        }
+        
+        window.onload=function(){
+            // устанавляиваем ширину стартового дива
+            id('main').style.width=main.width*20;
+            id('main').onclick=function(){ // вешаем на него обработчик клика
+                main.waves.push(new wave('rgb('+rand(0,255)+','+rand(0,255)+','+rand(0,255)+')'));
+            }
+            // забиваем стартовй див другими дивами котоыре и будут менять цвет
+            for(i=0;i<main.height;i++){
+                for(j=0;j<main.width;j++){
+                    box=document.createElement('DIV');
+                    box.id='box_'+i+'_'+j;
+                    box.className='box';
+                    id('main').appendChild(box);
+                }
+            }
+            // запускаем анимацию
+            setInterval(start,1000/main.speed);
+        }
+        
+        function start(){
+            // проходим по всем волнам и двигаем каждую
+            for(i=0;i<main.waves.length;i++){
+                if(main.waves[i]){
+                    // если вернулось значение то волна закончила работу - удаляем из массива
+                    if(main.waves[i].move())delete main.waves[i];
+                }
+            }
+        }
+        
+        function wave(color){
+            this.x=0; // стартовая точка - середина левого края
+            this.y=Math.floor(main.height/2);
+            this.color=color;
+            this.move=function(){
+                x=this.x++;
+                iteration=0;
+                while(x>=0){
+                    width=x<main.width-1?x:main.width-1;
+                    // проходим от новой точки (сдвиг x вперед) по диагоналям вверх и вниз
+                    // и куча разхных проверок чтобы не цикл не выходил за пределы поля
+                    if(this.y-iteration>=0)id('box_'+(this.y-iteration)+'_'+width).style.backgroundColor=this.color;
+                    if(this.y+iteration<main.height)id('box_'+(this.y+iteration)+'_'+width).style.backgroundColor=this.color;
+                    
+                    // если уже закрашены правая верзняя и нижняя точки то волна пройдена - можно удалять.
+                    if((this.y-iteration<0&&this.y+iteration>=main.height)&&x>=main.width-1)
+                        return true;
+                    
+                    iteration++;
+                    x--;
+                }
+                return;
+            }
+        }
+        
+        
+    </script>
+    <div class="main" id="main">
+    </div>
+    <div id="text"></div>
+</body>
